@@ -1,0 +1,73 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 2s ease-out;
+  height: 80px;
+}
+
+.header {
+  background-color: #76eeff;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-bottom: medium solid #68c8d9;
+}
+
+#app-title {
+  margin: 10px;
+}
+
+#content {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+}
+
+.content {
+  .taskList {
+    margin: 0px 20px;
+    width: 400px;
+    ul {
+      padding: 0px 5px;
+      list-style: none;
+      li {
+        button.move-button {
+          //@color: white;
+          //background: @color;
+          //border: medium outset @color;
+          float: right;
+        }
+        button.add-button {
+          padding: 20px 100px;
+        }
+      }
+    }
+  }
+  .todoList {
+    @color: #fff29d;
+    background: darken(@color, 6%);
+    border: medium outset @color;
+    li {
+      border: medium outset @color;
+      background: @color;
+    }
+  }
+  .doneList {
+    @color: #a3ffbd;
+    background: darken(@color, 6%);
+    border: medium outset @color;
+    li {
+      border: medium outset @color;
+      background: @color;
+    }
+  }
+  h2 {
+    margin: 0px;
+  }
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg);}
+  to { transform: rotate(360deg);}
+}

@@ -1,19 +1,62 @@
 .App {
   text-align: center;
 }
-
 .App-logo {
   animation: App-logo-spin infinite 2s ease-out;
   height: 80px;
 }
-
-.App-header {
-  background-color: #222;
-  padding: 20px;
-  color: white;
+.header {
+  background-color: #76eeff;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-bottom: medium solid #68c8d9;
 }
-
+#app-title {
+  margin: 10px;
+}
+#content {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+}
+.content .taskList {
+  margin: 0px 20px;
+  width: 400px;
+}
+.content .taskList ul {
+  padding: 0px 5px;
+  list-style: none;
+}
+.content .taskList ul li button.move-button {
+  float: right;
+}
+.content .taskList ul li button.add-button {
+  padding: 20px 100px;
+}
+.content .todoList {
+  background: #ffee7e;
+  border: medium outset #fff29d;
+}
+.content .todoList li {
+  border: medium outset #fff29d;
+  background: #fff29d;
+}
+.content .doneList {
+  background: #84ffa7;
+  border: medium outset #a3ffbd;
+}
+.content .doneList li {
+  border: medium outset #a3ffbd;
+  background: #a3ffbd;
+}
+.content h2 {
+  margin: 0px;
+}
 @keyframes App-logo-spin {
-  from { transform: rotate(0deg);}
-  to { transform: rotate(360deg);}
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
