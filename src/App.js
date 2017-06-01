@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import injectTapEventPlugin from 'react-tap-event-plugin';
-import RaisedButton from 'material-ui/RaisedButton';
+import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import injectTapEventPlugin from 'react-tap-event-plugin'
+import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
-import logo from './logo.svg';
-import './App.css';
+import logo from './logo.svg'
+import './App.css'
 
 injectTapEventPlugin()
 
@@ -14,24 +15,10 @@ class App extends Component {
       <div className="App">
         <Header />
         <Content />
-        <Material />
       </div>
-    );
+    )
   }
 }
-
-const print = () => {
-  console.log('tekittooooo')
-}
-
-const Material = () => (
-  <MuiThemeProvider>
-    <div>
-      <RaisedButton label="Default" onTouchTap={print}/>
-      <TextField hintText="Hint Text" />
-    </div>
-  </MuiThemeProvider>
-)
 
 class Header extends Component {
   render() {
@@ -47,7 +34,9 @@ class Header extends Component {
 class Content extends Component {
   constructor(props) {
     super(props)
-    this.state = {data: ''};
+    this.state = {
+      data: '', isPressedTodoAddButton: false, isPressedDoneAddButton: false
+    }
   }
 
   loadCountFromServer = () => {
@@ -58,10 +47,10 @@ class Content extends Component {
         }
         return res.json()
       })
-      .then(data => this.setState({data: data}));
+      .then(data => this.setState({data: data}))
   }
 
-  moveTask = (body) => {
+  moveTask = body => {
     fetch('/move', {
       method: 'POST',
       body: JSON.stringify(body)
@@ -72,7 +61,51 @@ class Content extends Component {
         }
         return res.json()
       })
-      .then(data => this.setState({data: data}));
+      .then(data => this.setState({data: data}))
+  }
+
+  deleteTask = body => {
+    fetch('/delete', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw Error(res.statusText)
+        }
+        return res.json()
+      })
+      .then(data => this.setState({data: data}))
+  }
+
+  addTask = body => {
+    fetch('/add', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw Error(res.statusText)
+        }
+        return res.json()
+      })
+      .then(data => this.setState({data: data}))
+  }
+
+  toggleState = (type) => {
+    if (type === 'todo') {
+      if (this.state.isPressedTodoAddButton) {
+        this.setState({isPressedTodoAddButton: false})
+      } else {
+        this.setState({isPressedTodoAddButton: true})
+      }
+    } else if (type === 'done') {
+      if (this.state.isPressedDoneAddButton) {
+        this.setState({isPressedDoneAddButton: false})
+      } else {
+        this.setState({isPressedDoneAddButton: true})
+      }
+    }
   }
 
   componentWillMount() {
@@ -80,16 +113,26 @@ class Content extends Component {
   }
 
   componentDidMount() {
-    setInterval(this.loadCountFromServer, 10000)
+    setInterval(this.loadCountFromServer, 3000)
   }
 
   render() {
     return (
       <div className="content" id="content">
         <TaskList type="todo" taskList={this.state.data.todo_list}
-                  onMoveTask={this.moveTask}/>
+                  onMoveTask={this.moveTask}
+                  onDeleteTask={this.deleteTask}
+                  isPressed={this.state.isPressedTodoAddButton}
+                  onPressedAddButton={this.toggleState}
+                  addTask={this.addTask}
+                  />
         <TaskList type="done" taskList={this.state.data.done_list}
-                  onMoveTask={this.moveTask}/>
+                  onMoveTask={this.moveTask}
+                  onDeleteTask={this.deleteTask}
+                  isPressed={this.state.isPressedDoneAddButton}
+                  onPressedAddButton={this.toggleState}
+                  addTask={this.addTask}
+                  />
       </div>
     )
   }
@@ -112,6 +155,13 @@ class TaskList extends Component {
     }
   }
 
+  nl2br = text => {
+    const regex = /(\n)/g
+    return text.split(regex).map(line => {
+      return line.match(regex) ? <br /> : line
+    })
+  }
+
   render() {
     let taskNodes = undefined
     if (this.props.taskList !== undefined) {
@@ -121,8 +171,13 @@ class TaskList extends Component {
           type: this.props.type
         }
         return (
-          <li key={task.id}>
-            {task.title}
+          <li className="task" key={task.id}>
+            <button type="button" className="delete-button"
+                    onClick={() => this.props.onDeleteTask(post_body)}>
+              ×
+            </button>
+            <button className="task-title">
+                    {this.nl2br(task.title)}</button>
             <button type="button" className="move-button"
                     onClick={() => this.props.onMoveTask(post_body)}>
               move
@@ -131,17 +186,66 @@ class TaskList extends Component {
         )
       })
     }
+    let addedTask
+    if (this.props.isPressed) {
+      addedTask = <AddedTask
+        type={this.props.type}
+        onPressedAddButton={this.props.onPressedAddButton.bind(this, this.props.type)}
+        addTask={this.props.addTask}
+      />
+    }
     return (
       <div className={this.className + " taskList"}>
         <h2>{this.title}</h2>
         <ul>
-          <li><button type="button" className="add-button">＋</button></li>
+          <li id="add-button-li">
+            <button type="button" className="add-button"
+            onClick={this.props.onPressedAddButton.bind(this, this.props.type)}>＋
+            </button>
+          </li>
+          {addedTask}
           {taskNodes}
-          <li><button type="button" className="add-button">＋</button></li>
         </ul>
       </div>
     )
   }
 }
 
-export default App;
+class AddedTask extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {text: ""}
+  }
+
+  handleTouchTap = () => {
+    let text = this.refs.task.getValue()
+    this.setState({text: ""})
+    console.log(text)
+    this.props.onPressedAddButton()
+    console.log({type: this.props.type, text: text})
+    this.props.addTask({type: this.props.type, text: text})
+  }
+
+  handleChange = (event) => {
+    this.setState({
+      text: event.target.value
+    })
+  }
+
+  render () {
+    return (
+      <MuiThemeProvider>
+        <div>
+          <TextField ref="task" value={this.state.text} onChange={this.handleChange}
+            hintText="Write your task" multiLine={true} rows={1}
+          />
+          <RaisedButton
+            label="Add" onTouchTap={this.handleTouchTap}
+          />
+        </div>
+      </MuiThemeProvider>
+    )
+  }
+}
+
+export default App

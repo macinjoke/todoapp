@@ -27,10 +27,32 @@
   padding: 0px 5px;
   list-style: none;
 }
-.content .taskList ul li button.move-button {
-  float: right;
+.content .taskList ul li.task {
+  display: flex;
+  justify-content: flex-end;
 }
-.content .taskList ul li button.add-button {
+.content .taskList ul li.task button.task-title {
+  text-align: left;
+  flex-grow: 2.0;
+  margin: 0px;
+  padding: 10px;
+  background: none;
+  border: none;
+  font-size: 14px;
+}
+.content .taskList ul li.task button.move-button {
+  background: rgba(255, 255, 255, 0.65);
+  border: medium outset rgba(255, 255, 255, 0.65);
+}
+.content .taskList ul li.task button.delete-button {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border: medium outset rgba(255, 255, 255, 0.3);
+  color: red;
+}
+.content .taskList ul li#add-button-li button.add-button {
+  background: rgba(255, 255, 255, 0.65);
+  border: medium outset rgba(255, 255, 255, 0.65);
   padding: 20px 100px;
 }
 .content .todoList {
