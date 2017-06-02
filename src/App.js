@@ -217,6 +217,10 @@ class AddedTask extends Component {
     this.state = {text: ""}
   }
 
+  componentDidMount() {
+    this.refs.task.focus()
+  }
+
   handleTouchTap = () => {
     let text = this.refs.task.getValue()
     this.setState({text: ""})
