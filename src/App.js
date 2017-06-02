@@ -182,11 +182,7 @@ class AddedTask extends Component {
     let text = this.refs.task.getValue()
 
     this.setState({ text: '' })
-
-    console.log(text)
     onPressedAddButton()
-
-    console.log({ type, text })
     addTask({ type, text })
   }
 
