@@ -56,7 +56,7 @@ class Content extends Component {
   }
 
   toggleDone = () => {
-    this.setState({ isPressedTodo: !this.state.isPressedDone })
+    this.setState({ isPressedDone: !this.state.isPressedDone })
   }
 
   componentWillMount() {
@@ -156,7 +156,9 @@ const Task = ({ task, onDeleteTask, onMoveTask, post_body }) => (
       ×
     </button>
     <button className="task-title">
-      {task.title}
+      {task.title.split(/(\n)/g).map(line => {
+        return line.match(/(\n)/g) ? <br /> : line
+      })}
     </button>
     <button
       type="button"
