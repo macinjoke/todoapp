@@ -49,6 +49,7 @@
   background: rgba(255, 255, 255, 0.3);
   border: medium outset rgba(255, 255, 255, 0.3);
   color: red;
+  font-size: 18px;
 }
 .content .taskList ul li#add-button-li button.add-button {
   background: rgba(255, 255, 255, 0.65);
