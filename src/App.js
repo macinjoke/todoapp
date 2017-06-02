@@ -77,7 +77,7 @@ class Content extends Component {
           taskList={this.state.data.todo_list}
           onMoveTask={this.moveTask}
           onDeleteTask={this.deleteTask}
-          isPressed={this.state.isPressedTodoAddButton}
+          isPressed={this.state.isPressedTodo}
           onPressedAddButton={this.toggleTodo}
           addTask={this.addTask}
         />
@@ -88,7 +88,7 @@ class Content extends Component {
           taskList={this.state.data.done_list}
           onMoveTask={this.moveTask}
           onDeleteTask={this.deleteTask}
-          isPressed={this.state.isPressedDoneAddButton}
+          isPressed={this.state.isPressedDone}
           onPressedAddButton={this.toggleDone}
           addTask={this.addTask}
         />
