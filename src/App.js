@@ -1,5 +1,5 @@
+// @flow
 import React, { Component } from 'react'
-import ReactDOM from 'react-dom'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import injectTapEventPlugin from 'react-tap-event-plugin'
 import RaisedButton from 'material-ui/RaisedButton'
@@ -9,103 +9,54 @@ import './App.css'
 
 injectTapEventPlugin()
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <Header />
-        <Content />
-      </div>
-    )
-  }
+const request = async (endpoint, opts = {}) => {
+  const res = await fetch(endpoint, opts)
+  const data = await res.json()
+  return data
 }
 
-class Header extends Component {
-  render() {
-    return (
-      <header className="header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h2 id="app-title">TODO App</h2>
-      </header>
-    )
-  }
-}
+const App = () => (
+  <div className="App">
+    <Header />
+    <Content />
+  </div>
+)
+
+const Header = () => (
+  <header className="header">
+    <img src={logo} className="App-logo" alt="logo" />
+    <h2 id="app-title">TODO App</h2>
+  </header>
+)
 
 class Content extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      data: '', isPressedTodoAddButton: false, isPressedDoneAddButton: false
-    }
+  state = {
+    data: '',
+    isPressedTodo: false,
+    isPressedDone: false,
   }
 
-  loadCountFromServer = () => {
-    fetch('/load')
-      .then(res => {
-        if (!res.ok) {
-          throw Error(res.statusText)
-        }
-        return res.json()
-      })
-      .then(data => this.setState({data: data}))
+  post = async (endpoint, body) => {
+    const opts = { method: 'POST', body: JSON.stringify(body) }
+    const data = await request(endpoint, opts)
+    this.setState({ data })
   }
 
-  moveTask = body => {
-    fetch('/move', {
-      method: 'POST',
-      body: JSON.stringify(body)
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw Error(res.statusText)
-        }
-        return res.json()
-      })
-      .then(data => this.setState({data: data}))
+  moveTask = body => this.post('/move', body)
+  deleteTask = body => this.post('/delete', body)
+  addTask = body => this.post('/add', body)
+
+  loadCountFromServer = async () => {
+    const data = await request('/load')
+    this.setState({ data })
   }
 
-  deleteTask = body => {
-    fetch('/delete', {
-      method: 'POST',
-      body: JSON.stringify(body)
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw Error(res.statusText)
-        }
-        return res.json()
-      })
-      .then(data => this.setState({data: data}))
+  toggleTodo = () => {
+    this.setState({ isPressedTodo: !this.state.isPressedTodo })
   }
 
-  addTask = body => {
-    fetch('/add', {
-      method: 'POST',
-      body: JSON.stringify(body)
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw Error(res.statusText)
-        }
-        return res.json()
-      })
-      .then(data => this.setState({data: data}))
-  }
-
-  toggleState = (type) => {
-    if (type === 'todo') {
-      if (this.state.isPressedTodoAddButton) {
-        this.setState({isPressedTodoAddButton: false})
-      } else {
-        this.setState({isPressedTodoAddButton: true})
-      }
-    } else if (type === 'done') {
-      if (this.state.isPressedDoneAddButton) {
-        this.setState({isPressedDoneAddButton: false})
-      } else {
-        this.setState({isPressedDoneAddButton: true})
-      }
-    }
+  toggleDone = () => {
+    this.setState({ isPressedTodo: !this.state.isPressedDone })
   }
 
   componentWillMount() {
@@ -119,133 +70,143 @@ class Content extends Component {
   render() {
     return (
       <div className="content" id="content">
-        <TaskList type="todo" taskList={this.state.data.todo_list}
-                  onMoveTask={this.moveTask}
-                  onDeleteTask={this.deleteTask}
-                  isPressed={this.state.isPressedTodoAddButton}
-                  onPressedAddButton={this.toggleState}
-                  addTask={this.addTask}
-                  />
-        <TaskList type="done" taskList={this.state.data.done_list}
-                  onMoveTask={this.moveTask}
-                  onDeleteTask={this.deleteTask}
-                  isPressed={this.state.isPressedDoneAddButton}
-                  onPressedAddButton={this.toggleState}
-                  addTask={this.addTask}
-                  />
+        <TaskList
+          type="todo"
+          title="TODO"
+          className="todoList"
+          taskList={this.state.data.todo_list}
+          onMoveTask={this.moveTask}
+          onDeleteTask={this.deleteTask}
+          isPressed={this.state.isPressedTodoAddButton}
+          onPressedAddButton={this.toggleTodo}
+          addTask={this.addTask}
+        />
+        <TaskList
+          type="done"
+          title="DONE"
+          className="doneList"
+          taskList={this.state.data.done_list}
+          onMoveTask={this.moveTask}
+          onDeleteTask={this.deleteTask}
+          isPressed={this.state.isPressedDoneAddButton}
+          onPressedAddButton={this.toggleDone}
+          addTask={this.addTask}
+        />
       </div>
     )
   }
 }
 
 class TaskList extends Component {
-  constructor(props){
-    super(props)
-    switch (props.type) {
-      case 'todo':
-        this.className = 'todoList'
-        this.title = 'TODO'
-        break
-      case 'done':
-        this.className = 'doneList'
-        this.title = 'DONE'
-        break
-      default:
-        break
-    }
-  }
-
-  nl2br = text => {
-    const regex = /(\n)/g
-    return text.split(regex).map(line => {
-      return line.match(regex) ? <br /> : line
-    })
-  }
-
   render() {
-    let taskNodes = undefined
-    if (this.props.taskList !== undefined) {
-      taskNodes = this.props.taskList.map(task => {
-        const post_body = {
-          id: task.id,
-          type: this.props.type
-        }
-        return (
-          <li className="task" key={task.id}>
-            <button type="button" className="delete-button"
-                    onClick={() => this.props.onDeleteTask(post_body)}>
-              ×
-            </button>
-            <button className="task-title">
-                    {this.nl2br(task.title)}</button>
-            <button type="button" className="move-button"
-                    onClick={() => this.props.onMoveTask(post_body)}>
-              move
-            </button>
-          </li>
-        )
-      })
-    }
-    let addedTask
-    if (this.props.isPressed) {
-      addedTask = <AddedTask
-        type={this.props.type}
-        onPressedAddButton={this.props.onPressedAddButton.bind(this, this.props.type)}
-        addTask={this.props.addTask}
-      />
-    }
+    const {
+      taskList,
+      onDeleteTask,
+      onMoveTask,
+      isPressed,
+      title,
+      className,
+      onPressedAddButton,
+      type,
+      addTask,
+    } = this.props
+
     return (
-      <div className={this.className + " taskList"}>
-        <h2>{this.title}</h2>
+      <div className={className + ' taskList'}>
+        <h2>{title}</h2>
         <ul>
           <li id="add-button-li">
-            <button type="button" className="add-button"
-            onClick={this.props.onPressedAddButton.bind(this, this.props.type)}>＋
+            <button
+              type="button"
+              className="add-button"
+              onClick={() => onPressedAddButton(type)}
+            >
+              ＋
             </button>
           </li>
-          {addedTask}
-          {taskNodes}
+          {isPressed &&
+            <AddedTask
+              type={type}
+              onPressedAddButton={() => onPressedAddButton(type)}
+              addTask={addTask}
+            />}
+          {taskList &&
+            taskList.map((task, i) => (
+              <Task
+                task={task}
+                key={i}
+                onDeleteTask={onDeleteTask}
+                onMoveTask={onMoveTask}
+                post_body={{ id: task.id, type }}
+              />
+            ))}
         </ul>
       </div>
     )
   }
 }
 
+const Task = ({ task, onDeleteTask, onMoveTask, post_body }) => (
+  <li className="task">
+    <button
+      type="button"
+      className="delete-button"
+      onClick={() => onDeleteTask(post_body)}
+    >
+      ×
+    </button>
+    <button className="task-title">
+      {task.title}
+    </button>
+    <button
+      type="button"
+      className="move-button"
+      onClick={() => onMoveTask(post_body)}
+    >
+      move
+    </button>
+  </li>
+)
+
 class AddedTask extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {text: ""}
-  }
+  state = { text: '' }
 
   componentDidMount() {
     this.refs.task.focus()
   }
 
   handleTouchTap = () => {
+    const { type, addTask, onPressedAddButton } = this.props
     let text = this.refs.task.getValue()
-    this.setState({text: ""})
+
+    this.setState({ text: '' })
+
     console.log(text)
-    this.props.onPressedAddButton()
-    console.log({type: this.props.type, text: text})
-    this.props.addTask({type: this.props.type, text: text})
+    onPressedAddButton()
+
+    console.log({ type, text })
+    addTask({ type, text })
   }
 
-  handleChange = (event) => {
-    this.setState({
-      text: event.target.value
-    })
+  handleChange = event => {
+    if (event.target.value) {
+      this.setState({ text: event.target.value })
+    }
   }
 
-  render () {
+  render() {
     return (
       <MuiThemeProvider>
         <div>
-          <TextField ref="task" value={this.state.text} onChange={this.handleChange}
-            hintText="Write your task" multiLine={true} rows={1}
+          <TextField
+            ref="task"
+            value={this.state.text}
+            onChange={this.handleChange}
+            hintText="Write your task"
+            multiLine={true}
+            rows={1}
           />
-          <RaisedButton
-            label="Add" onTouchTap={this.handleTouchTap}
-          />
+          <RaisedButton label="Add" onTouchTap={this.handleTouchTap} />
         </div>
       </MuiThemeProvider>
     )
