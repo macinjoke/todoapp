@@ -4,6 +4,10 @@
 
 React 練習用のTODOアプリを1から作成。 `create-react-app` を使用。
 
+## ENVIRONMRNT
+- python 3.6.0
+- npm 3.10.10
+
 ## SETUP
 
 ```
